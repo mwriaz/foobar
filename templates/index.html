@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %} Home | Foobar {% endblock title %}
+
+  
+{% block body %}
+
+<head>
+  <title>Home Page</title>
+</head>
+
+<body >
+
+    <div>
+        <h1><b><br>Python Skill Test Home page</b></h1>
+        <p style="color:#EEE8AA;white-space:pre-line"> Welcome to Foobar home page. You can use this web portal to test your python skills and expertiese level.
+            Select any available test and start testing your skills.</p>
+        <br>
+        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:50px;width:50%;margin:0 auto;padding:100px 0;">
+            <nav style="text-align:center;color:#DAA520" class="navbar navbar-expand-lg navbar-dark bg-dark">
+                    <li class="nav-item active;padding-left:30px">
+                        <a style="color:#FFFFFF" class="nav-link" href="/tests">Take Test</a>
+                    </li>
+                     &emsp; &emsp;&emsp;
+                    <li class="nav-item active;padding-left:30px">
+                        <a style="color:#FFFFFF" class="nav-link" href="/results">Check Results</a>
+                    </li>
+            </nav>
+        </div>
+    </div>
+
+
+
+
+
+</body>
+
+
+{% endblock body %}

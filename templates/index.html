@@ -12,12 +12,44 @@
 <body >
 
     <div>
-        <h1><b><br>Python Skill Test Home page</b></h1>
-        <p style="color:#EEE8AA;white-space:pre-line"> Welcome to Foobar home page. You can use this web portal to test your python skills and expertiese level.
-            Select any available test and start testing your skills.</p>
-        <br>
-        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:50px;width:50%;margin:0 auto;padding:100px 0;">
-            <nav style="text-align:center;color:#DAA520" class="navbar navbar-expand-lg navbar-dark bg-dark">
+        {% if request.user.is_authenticated %}
+            <h1><b><br>Welcome {{ request.user }} !!</b></h1>
+        {% endif %}
+        {% if request.user.is_anonymous %}
+            <h1><b><br>Please login to begin</b></h1>
+        {% endif %}
+        
+        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:220px;width:50%;margin:0 auto;padding:0px 5px;">
+            {% if request.user.is_authenticated %}
+                <p style="text-align:left">anonymous@foobar:    su {{ request.user }} </p>
+                <p style="text-align:left">Password:    *********</p>
+                <p style="text-align:left">{{ request.user }}@foobar:    help</p>
+                <p style="text-align:left">run <a style="color:#FFFFFF" class="nav-link" href="/tests">test.py</a> to take test</p>
+                <p style="text-align:left">run <a style="color:#FFFFFF" class="nav-link" href="/results">result.py</a> to view result</p>
+                <p style="text-align:left">{{ request.user }}@foobar:    █</p>
+            {% endif %}
+        
+        
+        {% if request.user.is_anonymous %}
+            <form method="POST" action="/">
+            {% csrf_token %}
+                <br><br>
+                <p><label for="username">User Name: </label>
+                <input  class="username" name="username" type="username" rows="1" cols="66" required><br><br></p>
+                
+                <p><label for="password">Password: </label>
+                <input  class="password" name="password" type="password" rows="1" cols="66" required><br><br></p>
+                
+                <button class="button" type="submit">Login</button>
+                
+            </form>
+        {% endif %}
+        </div>
+        
+        <br><br>
+        
+        {% if request.user.is_authenticated %}
+            <nav style="text-align:center;color:#DAA520;font-size:20px" class="navbar navbar-expand-lg navbar-dark bg-dark">
                     <li class="nav-item active;padding-left:30px">
                         <a style="color:#FFFFFF" class="nav-link" href="/tests">Take Test</a>
                     </li>
@@ -26,10 +58,11 @@
                         <a style="color:#FFFFFF" class="nav-link" href="/results">Check Results</a>
                     </li>
             </nav>
-        </div>
+        {% endif %}
+        
+        
+        
     </div>
-
-
 
 
 

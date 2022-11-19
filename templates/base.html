@@ -23,21 +23,51 @@
     <body style="background-color:black;color:white;font-family:Georgia,serif;text-align:center;font-size:12">
     <nav style="text-align:left;color:#DAA520" class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="collapse navbar-collapse" id="navbarSupportedContent" style="color:#DAA520">
-            <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
                     <a style="color:#EEE8AA" class="nav-link" href="/">Foobar Home <span class="sr-only"></span></a>
                 </li>
+                {% if request.user.is_authenticated %}
                     |    
                 <li class="nav-item">
                     <a style="color:#EEE8AA" class="nav-link" href="/tests">Tests</a>
                 </li>
+                {% endif %}
+                {% if request.user.is_authenticated %}
                     |    
                 <li class="nav-item">
                     <a style="color:#EEE8AA" class="nav-link" href="/results">Results</a>
                 </li>
+                {% endif %}
+                {% if request.user.is_superuser %}
+                    |    
+                <li class="nav-item">
+                    <a style="color:#EEE8AA" class="nav-link" href="/test_manage">Test Management</a>
+                </li>
+                {% endif %}
+                {% if request.user.is_superuser %}
+                    |    
+                <li class="nav-item">
+                    <a style="color:#EEE8AA" class="nav-link" href="/users">User Management</a>
+                </li>
+                {% endif %}
+                {% if request.user.is_superuser %}
+                    |    
+                <li class="nav-item">
+                    <a style="color:#EEE8AA" class="nav-link" href="/admin">Admin Panel</a>
+                </li>
+                {% endif %}
             </ul>
-        </div>
     </nav>
+    {% if request.user.is_authenticated %}
+        <nav style="text-align:right;color:#DAA520" class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent" style="color:#DAA520">
+                    <li class="nav-item">
+                        <a style="color:#EEE8AA" class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    {% endif %}
         
         {% if messages %}
         {% for message in messages %}

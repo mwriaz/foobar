@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %} Home | Foobar {% endblock title %}
+
+  
+{% block body %}
+
+<head>
+  <title>Home Page</title>
+</head>
+
+<body>
+    <form method="POST" action="/test_manage/">
+    {% csrf_token %}
+        <br><br><br><br><br><br>
+        <nav style="text-align:center;color:#DAA520" class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent" style="color:#DAA520">
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="e_test">Enable Test</botton>
+                </li>
+                    |   
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="d_test">Disable Test</botton>
+                </li>
+                    |   
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_test">Add New Test</botton>
+                </li>
+                    |   
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_question">Add Question</botton>
+                </li>
+            </div>
+        </nav>
+        <h1> {{ op }} </h1>
+        <div>
+            {% if op == 1 %}
+                <h1><b><br>Enable Test</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:220px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <br><br>
+                    <p><label>Select Test: </label>
+                    <select id="t_id" class="t_id" name="t_id">
+                        {% for i in n_t_ids %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select></p>
+
+<!--                     <label><input type="radio" name="enable" value="enable" checked>Open</label>
+                    <label><input type="radio" name="enable" value="disable">Close</label> -->
+                    <br><br>
+                    <button class="button" type="submit" name="enable_test" value={{ op }}>Enable</botton>
+                </div>
+            {% endif %}
+            {% if op == 2 %}
+                <h1><b><br>Disable Test</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:220px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <br><br>
+                    <p><label>Select Test: </label>
+                    <select id="t_id" class="t_id" name="t_id">
+                        {% for i in t_ids %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select></p>
+                    <br><br>
+                    <button class="button" type="submit" name="disable_test" value={{ op }}>Disable</botton>
+                </div>
+            {% endif %}
+            {% if op == 3 %}
+                <h1><b><br>Add Test</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:220px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <br>
+                    <p><label>Test Name: </label>
+                    <input style="height:12px;" id="t_id" class="t_id" name="t_id">
+                    </p>
+                    <br>
+                    <label><input type="radio" name="enable" value="enable" checked>Open</label>
+                    <label><input type="radio" name="enable" value="disable">Close</label>
+                    <br><br><br>
+                    <button class="button" type="submit" name="add_test" value={{ op }}>Add</botton>
+                </div>
+            {% endif %}
+            {% if op == 4 %}
+                <h1><b><br>Add Question</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:220px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <div style="text-align: center;">
+                        <div style="display: inline-block; text-align: left;">
+                           <p>
+                                <label>Select Test: </label>
+                                <select id="t_ids" class="t_ids" name="t_ids">
+                                    {% for i in t_ids %}
+                                    <option value="{{ i }}">{{ i }}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                            <p>
+                                <label>Score: </label>
+                                <input class="score" name="score" id="score" style="height:12px">
+                            </p>
+                            <p>
+                                <label>Problem Statement: </label>
+                                <input class="statement" name="statement" id="statement" style="height:12px">
+                            </p>
+                            <p>
+                                <label>Solution: </label>
+                                <input class="solution" name="solution" id="solution" style="height:12px">
+                            </p>
+                            <p>
+                                <label>Test Cases: </label>
+                                <input class="testcases" name="testcases" id="testcases" style="height:12px">
+                            </p>
+                        </div>
+                    </div>
+            </div>
+            {% endif %}
+        </div>
+    </form>
+
+
+</body>
+
+
+{% endblock body %}

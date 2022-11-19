@@ -1,3 +1,9 @@
 from django.contrib import admin
+from skill_test.models import Questions
+from skill_test.models import Tests
 
-# Register your models here.
+
+admin.site.register(Questions)
+admin.site.register(Tests)
+
+

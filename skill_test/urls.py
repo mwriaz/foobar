@@ -9,7 +9,8 @@ urlpatterns = [
     path('tests/', views.tests, name='tests'),
     path('results/', views.results, name='results'),
     path('users_m/', views.users_m, name='users_m'),
-    path('take_test/', views.take_test, name='take_test')
+    path('take_test/', views.take_test, name='take_test'),
+    path("/(?P<t_id>\w+)/$", views.take_test, name='take_test')
     
     
 ]

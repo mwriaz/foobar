@@ -15,16 +15,40 @@
 </head>
 
 <body >
-
-    <div>
-        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:270px;width:50%;margin:0 auto;padding:0px 5px;">
-            {% if request.user.is_authenticated %}
-                <form method="POST" action="/">
-                {% csrf_token %}
-                </form>
-            {% endif %}
+    <form method="POST" action="/tests/">
+        {% csrf_token %}
+        <div>
+            <h1><b>Select Test</b></h1>
+            <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:500px;width:50%;margin:0 auto;padding:0px 5px;">
+                <p align="left" style="white-space:pre-line;"><b><u>Instructions</u></b>
+                      1. Paste your code below in solution.py (Text box).
+                      2. solution.py may contain atleast one function with name solution with exactly one parameter. Example: solution(x)
+                      3. print, input and import statemets are not allowed in solution.py
+                      4. infinite loops and infinte nested recursions are not allowed in solution.py
+                      5. Your solution will be tested on different test cases. A solution will be consider CORRECT if it passes all test cases.
+                      6. To run test cases (test the correctness of your solution) press verify button. <u><b>Verify button will just run test cases,It will not submit the solution.</b></u>
+                      7. To submit your solution use submit button. <u><b>You should verify your solution first, before subimitting your solution.</b></u>
+                      8. You can't submit solution for same problem twice. So submit it after testing with verify button and finalizing your solution.
+                      9. You may use Previous and Next buttons for previous and next problem. But remember, you can't submit an already submitted problem. You can submit only such problems, which you have skipped.
+                      10.You can also submit your solution if all the test cases are not passing.
+                </p>
+                <p>
+                    <input type="checkbox" name="agree" id="agree" class="agree" value="agree" checked>
+                    <label>I have carefully read the instructions </label>
+                </p>
+                <p>
+                    <label>Select Test: </label>
+                    <select id="t_id" class="t_id" name="t_id">
+                        {% for i in t_ids %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+                <br>
+                <button class="start" type="start" name="start">Start Test</button>
+            </div>
         </div>
-    </div>
+    </form>
 
 
 

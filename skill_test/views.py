@@ -38,6 +38,14 @@ def download_file(file_path):
             return response
     raise Http404
 
+
+def download_df_as_csv(df,filename):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename='+filename
+    df.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+    return response
+
+
 def validate(text, test, score):
     results = subprocess.Popen(
         [
@@ -68,9 +76,7 @@ def index(request):
         if "login" in request.POST:
             username = request.POST['username']
             password = request.POST['password']
-            print(username,password)
             user = authenticate(request, username=username, password=password)
-            print("user:",user)
             if user is not None:
                 login(request, user)
             else:
@@ -216,16 +222,41 @@ def tests(request):
         return redirect(index)
     if not request.user.is_authenticated:
         return redirect(index)
-    return render(request, 'tests.html', {})
+    username = request.user.username
+    username = "wickybestge883"
+    u = Users.objects.filter(username=username)[0]
+    allowed_test = json.loads(u.allowed_test)
+    tests = Tests.objects.all()
+    print(allowed_test)
+    t_ids = [t.t_id for t in tests if t.is_open and t.t_id in allowed_test]
+    email = u.email
+    if request.method == "POST":
+        agree = bool(request.POST.get("agree"))
+        t_id = request.POST.get("t_id")
+        if agree:
+            if t_id:
+                return redirect(take_test,t_id=t_id)
+            else:
+                messages.error(request, "No Test found!")
+        else:
+            messages.error(request, "Please read the instructions and mark the checkbox")
+    return render(
+        request,
+        'tests.html',
+        {
+            "t_ids":t_ids
+        }
+    )
 
-def take_test(request):
+def take_test(request, t_id):
     if not request.META.get('HTTP_REFERER'):
         return redirect(index)
     if not request.user.is_authenticated:
         return redirect(index)
-    return render(request, 'take_test.html', {})
+    print("haha",t_id)
+    return render(request, 'take_test.html', {"t_id":t_id})
 
-def users_m(request):
+def users_m(request, op=1, batches=[], all_t_ids=[]):
     try:
         if not request.META.get('HTTP_REFERER'):
             return redirect(index)
@@ -233,7 +264,8 @@ def users_m(request):
             return redirect(index)
         tests = Tests.objects.all()
         all_t_ids = [t.t_id for t in tests]
-        batches = ["1","training1"]
+        all_batches = Batches.objects.all()
+        batches = [b.b_id for b in all_batches if b.is_open]
         if request.method == "POST":
             if "a_user" in request.POST:
                 op = 1
@@ -258,6 +290,8 @@ def users_m(request):
                 degree = request.POST.get("degree")
                 year = request.POST.get("degree_year")
                 dob = request.POST.get("dob")
+                if not dob:
+                    dob="2000-01-01"
                 all_authenticated_users = User.objects.all()
                 all_existing_usernames = [u.username for u in all_authenticated_users]
                 all_existing_emails = [u.email for u in all_authenticated_users]
@@ -283,7 +317,6 @@ def users_m(request):
                                 messages.error(request, "Unable to create User.")
                         except:
                             messages.error(request, "Unable to create User.")
-#                 Batches(b_id="name", u_ids=json.dumps(['user1','user2']),is_open=True)
             if "del_user" in request.POST:
                 op = int(request.POST.get("del_user"))
                 email = request.POST.get("email")
@@ -302,19 +335,140 @@ def users_m(request):
                     del_flag = False
                 if not del_flag:
                     messages.error(request, "Unable to delete")
-            
-            
-            
             if "assign_user" in request.POST:
                 op = int(request.POST.get("assign_user"))
+                email = request.POST.get("email")
+                t_id = request.POST.get("t_id")
+                u = Users.objects.filter(email=email)
+                if u:
+                    try:
+                        u = u[0]
+                        u.is_active = True
+                        u.allowed_test = json.dumps(list(set(json.loads(u.allowed_test)+[t_id])))
+                        u.save()
+                        messages.success(request, "Test is assigned!")
+                    except:
+                        messages.error(request, "User not found!")
+                else:
+                    messages.error(request, "User not found!")
             if "assign_batch" in request.POST:
-                op = int(request.POST.get("assign_batch"))
+                try:
+                    op = int(request.POST.get("assign_batch"))
+                    b_id = request.POST.get("b_id")
+                    t_id = request.POST.get("t_id")
+                    b = Batches.objects.filter(b_id=b_id)[0]
+                    u_emails = json.loads(b.u_ids)
+                    done_e, error_e = [], []
+                    for email in u_emails:
+                        try:
+                            u = Users.objects.filter(email=email)
+                            if u:
+                                try:
+                                    u = u[0]
+                                    u.is_active = True
+                                    print(t_id)
+                                    print(u.name, u.allowed_test)
+                                    u.allowed_test = json.dumps(list(set(json.loads(u.allowed_test)+[t_id])))
+                                    print(u.name, u.allowed_test)
+                                    u.save()
+                                except:
+                                    error_e += [email]
+                                done_e += [email]
+                        except:
+                            error_e += [email]
+                    messages.success(request, "done for"+str(done_e)+(" failed for"+str(error_e) if error_e else ""))
+                except:
+                    print(traceback.print_exc())
+                    messages.error(request, "Unable to Assign!")
             if "create_batch" in request.POST:
-                op = int(request.POST.get("create_batch"))
-                csv_file = request.FILES["csv"]
-                df = pd.read_csv(io.BytesIO(csv_file.read()))
+                try:
+                    op = int(request.POST.get("create_batch"))
+                    batch_name = request.POST.get("batch_name")
+                    all_batches = Batches.objects.all()
+                    batches = [b.b_id for b in all_batches if b.is_open]
+                    if batch_name:
+                        if batch_name not in batches:
+                            csv_file = request.FILES["csv"]
+                            df = pd.read_csv(io.BytesIO(csv_file.read()))
+                            df = df.fillna("")
+                            all_authenticated_users = User.objects.all()
+                            all_existing_usernames = [u.username for u in all_authenticated_users]
+                            all_existing_emails = [u.email for u in all_authenticated_users]
+                            emails_to_add = []
+                            status_dict = {"name":[],"email":[],"password":[],"remarks":[]}
+                            for i in range(len(df)):
+                                p, s = "", "Failed"
+                                row = df.iloc[i]
+                                name = row["name"]
+                                email = row["email"]
+                                phone = row["phone"]
+                                dob = row["dob"]
+                                degree = row["degree"]
+                                year = row["year"]
+                                username = email.split("@")[0]
+                                while username in all_existing_usernames:
+                                    username = username + str(random.randint(0, 1000))
+                                password = generate_passwrod()
+                                if not dob:
+                                    dob="2000-01-01"
+                                try:
+                                    if email in all_existing_emails:
+                                        p = ""
+                                        s = "Previous user. Use previous password to login"
+                                    else:
+                                        a_user= User.objects.create_user(username=username,
+                                                                                 email=email,
+                                                                                 password=password)
+                                        if a_user:
+                                            p = password
+                                            s = "New user"
+                                        else:
+                                            p = ""
+                                            s = "Failed"
+                                    u = Users.objects.filter(email=email)
+                                    if u:
+                                        u = u[0]
+                                        u.password = password
+                                        u.is_active = True
+                                        u.save()
+                                    else:
+                                        usr = Users(name=name, email=email, phone=phone, degree=degree, year=year, dob=dob, allowed_test=json.dumps([]), username=username, password=password, is_active=True)
+                                        usr.save()
+                                except:
+                                    p, s = "", "Failed"
+                                status_dict["name"] += [name]
+                                status_dict["email"] += [email]
+                                status_dict["password"] += [p]
+                                status_dict["remarks"] += [s]
+                                if s!="Failed":
+                                    emails_to_add += [email]
+
+                            df = pd.DataFrame.from_dict(status_dict)
+                            b = Batches(b_id=batch_name, u_ids=json.dumps(emails_to_add), is_open=True)
+                            b.save()
+                            messages.success(request, "Batch saved succesfully")
+                            return download_df_as_csv(df,batch_name+".csv")
+                        else:
+                            messages.error(request, "Batch name already exists!")
+                    else:
+                        messages.error(request, "Batch name is required!")
+                except:
+                    messages.error(request, "Error Occured!")
             if "delete_batch" in request.POST:
                 op = int(request.POST.get("delete_batch"))
+                b_id = request.POST.get("b_id")
+                b = Batches.objects.filter(b_id=b_id)
+                if b:
+                    try:
+                        b = b[0]
+                        b.is_open = False
+                        b.save()
+                        all_batches = Batches.objects.all()
+                        batches = [b.b_id for b in all_batches if b.is_open]
+                    except:
+                        messages.error(request, "Batch not found!")
+                else:
+                    messages.error(request, "Batch not found!")
     except:
         print(traceback.print_exc())
     return render(

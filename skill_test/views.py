@@ -1,15 +1,42 @@
+import os
+import io
 import json
 import traceback
 import subprocess
+import random
+import string
+import pandas as pd
+
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import logout
 from django.contrib.auth import login
 from django.contrib import messages
+from django.http import HttpResponse
+from django.http import Http404
 from skill_test.models import Questions
 from skill_test.models import Tests
+from skill_test.models import Users
+from skill_test.models import Batches
+from skill_test.models import Results
 
+
+
+
+def generate_passwrod():
+    characters = string.ascii_letters + string.digits
+    return "".join(random.choice(characters) for i in range(7)) + random.choice(string.punctuation)
+
+
+def download_file(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            return response
+    raise Http404
 
 def validate(text, test, score):
     results = subprocess.Popen(
@@ -37,8 +64,8 @@ def logout_view(request):
 
 
 def index(request):
-    try:
-        if request.method == "POST":
+    if request.method == "POST":
+        if "login" in request.POST:
             username = request.POST['username']
             password = request.POST['password']
             print(username,password)
@@ -48,8 +75,14 @@ def index(request):
                 login(request, user)
             else:
                 messages.error(request, "Unable to Login")
-    except:
-        print(traceback.print_exc())
+        if "proceed" in request.POST:
+            opt = request.POST.get("opt")
+            if "test" in opt:
+                return redirect(tests)
+            elif "result" in opt:
+                return redirect(results)
+            else:
+                messages.error(request, "Write only 'run test.py' or 'run result.py'!")
     return render(request, 'index.html', {})
 
     
@@ -178,7 +211,130 @@ def test_manage(request, op=1):
     
     
         
-        
+def tests(request):
+    if not request.META.get('HTTP_REFERER'):
+        return redirect(index)
+    if not request.user.is_authenticated:
+        return redirect(index)
+    return render(request, 'tests.html', {})
+
+def take_test(request):
+    if not request.META.get('HTTP_REFERER'):
+        return redirect(index)
+    if not request.user.is_authenticated:
+        return redirect(index)
+    return render(request, 'take_test.html', {})
+
+def users_m(request):
+    try:
+        if not request.META.get('HTTP_REFERER'):
+            return redirect(index)
+        if not request.user.is_authenticated:
+            return redirect(index)
+        tests = Tests.objects.all()
+        all_t_ids = [t.t_id for t in tests]
+        batches = ["1","training1"]
+        if request.method == "POST":
+            if "a_user" in request.POST:
+                op = 1
+            if "d_user" in request.POST:
+                op = 2
+            if "a_t_u" in request.POST:
+                op = 3
+            if "a_t_b" in request.POST:
+                op = 4
+            if "c_batch" in request.POST:
+                op = 5
+            if "d_batch" in request.POST:
+                op = 6
+            if "download_csv" in request.POST:
+                op = int(request.POST.get("download_csv"))
+                return download_file("templates/batch_template.csv")
+            if "add_user" in request.POST:
+                op = int(request.POST.get("add_user"))
+                name = request.POST.get("full_name")
+                email = request.POST.get("email")
+                phone = request.POST.get("contact_number")
+                degree = request.POST.get("degree")
+                year = request.POST.get("degree_year")
+                dob = request.POST.get("dob")
+                all_authenticated_users = User.objects.all()
+                all_existing_usernames = [u.username for u in all_authenticated_users]
+                all_existing_emails = [u.email for u in all_authenticated_users]
+                if name=="" or email=="":
+                    messages.error(request, "Please fill all required fields i.e., name, email and password")
+                else:
+                    if email in all_existing_emails:
+                        messages.error(request, "Email Already Exists. Please a different email.")
+                    else:
+                        username = email.split("@")[0]
+                        while username in all_existing_usernames:
+                            username = username + str(random.randint(0, 1000))
+                        try:
+                            password = generate_passwrod()
+                            a_user= User.objects.create_user(username=username,
+                                                                 email=email,
+                                                                 password=password)
+                            if a_user:
+                                usr = Users(name=name, email=email, phone=phone, degree=degree, year=year, dob=dob, allowed_test=json.dumps([]), username=username, password=password, is_active=True)
+                                usr.save()
+                                messages.success(request, "User Created. Username(without qutations): '"+username+"' Password(without qutations): '"+password+"'")
+                            else:
+                                messages.error(request, "Unable to create User.")
+                        except:
+                            messages.error(request, "Unable to create User.")
+#                 Batches(b_id="name", u_ids=json.dumps(['user1','user2']),is_open=True)
+            if "del_user" in request.POST:
+                op = int(request.POST.get("del_user"))
+                email = request.POST.get("email")
+                del_flag = True
+                try:
+                    a_u = User.objects.get(email = email)
+                    a_u.delete()
+                except:
+                    del_flag = False
+                try:
+                    u = Users.objects.filter(email=email)[0]
+                    u.is_active=False
+                    u.save()
+                    messages.success(request, "The user is deleted")
+                except:
+                    del_flag = False
+                if not del_flag:
+                    messages.error(request, "Unable to delete")
+            
+            
+            
+            if "assign_user" in request.POST:
+                op = int(request.POST.get("assign_user"))
+            if "assign_batch" in request.POST:
+                op = int(request.POST.get("assign_batch"))
+            if "create_batch" in request.POST:
+                op = int(request.POST.get("create_batch"))
+                csv_file = request.FILES["csv"]
+                df = pd.read_csv(io.BytesIO(csv_file.read()))
+            if "delete_batch" in request.POST:
+                op = int(request.POST.get("delete_batch"))
+    except:
+        print(traceback.print_exc())
+    return render(
+        request,
+        'users_m.html',
+        {
+            "op":op,
+            "all_t_ids":all_t_ids,
+            "batches":batches
+        }
+    )
+
+def results(request):
+    if not request.META.get('HTTP_REFERER'):
+        return redirect(index)
+    if not request.user.is_authenticated:
+        return redirect(index)
+    return render(request, 'results.html', {})
+
+
 
 
 

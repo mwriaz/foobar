@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %} Users Management {% endblock title %}
+
+  
+{% block body %}
+
+<head>
+  <title>Home Page</title>
+</head>
+
+<body>
+    <form method="POST" action="/users_m/" enctype="multipart/form-data">
+    {% csrf_token %}
+        <br><br><br><br>
+        <nav style="text-align:center;color:#DAA520" class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent" style="color:#DAA520">
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_user">Add a user</button>
+                </li>
+                    |   
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="d_user">Delete a user</button>
+                </li>
+                    |   
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_t_u">Assign test to a user</button>
+                </li>
+                    |   
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_t_b">Assign test to a batch</button>
+                </li>
+                    |   
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="c_batch">Create a batch</button>
+                </li>
+                    |   
+                <li class="nav-item active">
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="d_batch">Delete a batch</button>
+                </li>
+            </div>
+        </nav>
+        
+        <div>
+            {% if op == 1 %}
+                <h1><b>Add a User</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:350px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <div style="text-align: center;">
+                        <div style="display: inline-block; text-align: left;">
+                            <br>
+                            <p>
+                                <label>Full Name(*): </label>
+                                <input type="text" class="full_name" name="full_name" id="full_name" style="height:12px">
+                            </p>
+                            <p>
+                                <label>Email(*): </label>
+                                <input type="email" class="email" name="email" id="email" style="height:12px">
+                            </p>
+                            <p>
+                                <label>Contact Number: </label>
+                                <input type="text" class="contact_number" name="contact_number" id="contact_number" style="height:12px">
+                            </p>
+                            <p>
+                                <label>Terminal Degree: </label>
+                                <input type="text" class="degree" name="degree" id="degree" style="height:12px">
+                            </p>
+                            <p>
+                                <label>Degree completion Year: </label>
+                                <input type="text" class="degree_year" name="degree_year" id="degree_year" style="height:12px">
+                            </p>
+                            <p>
+                                <label>Date of Birth: </label>
+                                <input type="date" class="dob" name="dob" id="dob">
+                            </p>
+                        </div>
+                    </div>
+                    <br><button class="button" type="submit" name="add_user" value={{ op }}>Add User</button>
+                </div>
+            {% endif %}
+            {% if op == 2 %}
+                <h1><b>Delete a User</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:150px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <br>
+                    <p>
+                        <label>Email: </label>
+                        <input type="email" class="email" name="email" id="email" style="height:12px">
+                    </p>
+                    <br><button class="button" type="submit" name="del_user" value={{ op }}>Delete</button>
+                </div>
+            {% endif %}
+            {% if op == 3 %}
+                <h1><b>Assign Test to a User</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:180px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <br>
+                    <p>
+                        <label>Email: </label>
+                        <input type="email" class="email" name="email" id="email" style="height:12px">
+                    </p>
+                    <p>
+                        <label>Select Test: </label>
+                        <select id="t_id" class="t_id" name="t_id">
+                            {% for i in all_t_ids %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </p>
+                    <br><button class="button" type="submit" name="assign_user" value={{ op }}>Assign</button>
+                </div>
+            {% endif %}
+            {% if op == 4 %}
+                <h1><b>Assign Test to a Batch</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:220px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <br>
+                    <p>
+                        <label>Select Batch: </label>
+                        <select id="b_id" class="b_id" name="b_id">
+                            {% for i in batches %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </p>
+                    <p>
+                        <label>Select Test: </label>
+                        <select id="t_id" class="t_id" name="t_id">
+                            {% for i in all_t_ids %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </p>
+                    <br><button class="button" type="submit" name="assign_batch" value={{ op }}>Assign</button>
+                </div>
+            {% endif %}
+            {% if op == 5 %}
+                <h1><b>Create a Batch</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:220px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <br>
+                    <p>
+                        <label>Batch Name: </label>
+                        <input type="text" class="batch_name" name="batch_name" id="batch_name" style="height:12px">
+                    </p>
+                    <br>
+                    <p>
+                        <label>Email's CSV: </label>
+                        <input type="file" class="csv" name="csv" id="csv">
+                    </p>
+                    <br>
+                    <p>
+                        <button class="button" type="submit" name="create_batch" value={{ op }}>Create</button>
+                    </p>
+                    <br>
+                    <div style="display:inline-block;text-align:left;align-self:left">
+                        <i><p><b>Note:</b>&emsp;&emsp;csv should contain name column for user's full name, email for emails</p>
+                        <p>&emsp;&emsp;&emsp;&emsp;&emsp;click <button style="color:blue;background-color:#000000;font-size:15px" type="submit" name="download_csv"><u>here</u></button> to download a sample of required csv for batch creation</p></i>
+                    </div>
+                </div>
+            {% endif %}
+            {% if op == 6 %}
+                <h1><b>Delete a Batch</b></h1>
+                <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:170px;width:50%;margin:0 auto;padding:0px 5px;">
+                    <br>
+                    <p>
+                        <label>Select Batch: </label>
+                        <select id="b_id" class="b_id" name="b_id">
+                            {% for i in batches %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </p>
+                    <br><br><button class="button" type="submit" name="delete_batch" value={{ op }}>Delete</button>
+                </div>
+            {% endif %}
+        </div>
+    </form>
+
+
+</body>
+
+
+{% endblock body %}

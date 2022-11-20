@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %} Select Test {% endblock title %}
+
+  
+{% block body %}
+
+<head>
+  <title>Home Page</title>
+  <style>
+      .no-outline:focus {
+          outline: none;
+      }
+    </style>
+</head>
+
+<body >
+
+    <div>
+        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:270px;width:50%;margin:0 auto;padding:0px 5px;">
+            {% if request.user.is_authenticated %}
+                <form method="POST" action="/">
+                {% csrf_token %}
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+
+
+</body>
+
+
+{% endblock body %}

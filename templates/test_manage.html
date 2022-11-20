@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} Home | Foobar {% endblock title %}
+{% block title %} Test Management {% endblock title %}
 
   
 {% block body %}
@@ -16,19 +16,19 @@
         <nav style="text-align:center;color:#DAA520" class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="collapse navbar-collapse" id="navbarSupportedContent" style="color:#DAA520">
                 <li class="nav-item active">
-                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="e_test">Enable Test</botton>
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="e_test">Enable Test</button>
                 </li>
                     |   
                 <li class="nav-item active">
-                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="d_test">Disable Test</botton>
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="d_test">Disable Test</button>
                 </li>
                     |   
                 <li class="nav-item active">
-                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_test">Add New Test</botton>
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_test">Add New Test</button>
                 </li>
                     |   
                 <li class="nav-item active">
-                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_question">Add Question</botton>
+                    <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="a_question">Add Question</button>
                 </li>
             </div>
         </nav>
@@ -45,7 +45,7 @@
                         {% endfor %}
                     </select></p>
                     <br><br>
-                    <button class="button" type="submit" name="enable_test" value={{ op }}>Enable</botton>
+                    <button class="button" type="submit" name="enable_test" value={{ op }}>Enable</button>
                 </div>
             {% endif %}
             {% if op == 2 %}
@@ -59,7 +59,7 @@
                         {% endfor %}
                     </select></p>
                     <br><br>
-                    <button class="button" type="submit" name="disable_test" value={{ op }}>Disable</botton>
+                    <button class="button" type="submit" name="disable_test" value={{ op }}>Disable</button>
                 </div>
             {% endif %}
             {% if op == 3 %}
@@ -73,7 +73,7 @@
                     <label><input type="radio" name="enable" value="enable" checked>Open</label>
                     <label><input type="radio" name="enable" value="disable">Close</label>
                     <br><br><br>
-                    <button class="button" type="submit" name="add_test" value={{ op }}>Add</botton>
+                    <button class="button" type="submit" name="add_test" value={{ op }}>Add</button>
                 </div>
             {% endif %}
             {% if op == 4 %}
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                     <br>
-                    <button class="button" type="submit" name="add_q" value={{ op }}>Submit</botton>
+                    <button class="button" type="submit" name="add_q" value={{ op }}>Submit</button>
                 </div>
             {% endif %}
         </div>

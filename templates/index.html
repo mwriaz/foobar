@@ -1,12 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %} Home | Foobar {% endblock title %}
+{% block title %} Home {% endblock title %}
 
   
 {% block body %}
 
 <head>
   <title>Home Page</title>
+  <style>
+      .no-outline:focus {
+          outline: none;
+      }
+    </style>
 </head>
 
 <body >
@@ -19,14 +24,19 @@
             <h1><b><br>Please login to begin</b></h1>
         {% endif %}
         
-        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:220px;width:50%;margin:0 auto;padding:0px 5px;">
+        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:270px;width:50%;margin:0 auto;padding:0px 5px;">
             {% if request.user.is_authenticated %}
-                <p style="text-align:left">anonymous@foobar:    su {{ request.user }} </p>
-                <p style="text-align:left">Password:    *********</p>
-                <p style="text-align:left">{{ request.user }}@foobar:    help</p>
-                <p style="text-align:left">run <a style="color:#FFFFFF" class="nav-link" href="/tests">test.py</a> to take test</p>
-                <p style="text-align:left">run <a style="color:#FFFFFF" class="nav-link" href="/results">result.py</a> to view result</p>
-                <p style="text-align:left">{{ request.user }}@foobar:    █</p>
+                <form method="POST" action="/">
+                {% csrf_token %}
+                    <p style="text-align:left"><span style="color:green">anonymous@foobar:</span><span style="color:blue">~</span>$&ensp;cd foobar </p>
+                    <p style="text-align:left"><span style="color:green">anonymous@foobar:</span><span style="color:blue">~/foobar</span>$&ensp;su {{ request.user }} </p>
+                    <p style="text-align:left">Password:&ensp;*********</p>
+                    <p style="text-align:left"><span style="color:green">{{ request.user }}@foobar:</span><span style="color:blue">~/foobar</span>$&ensp;help</p>
+                    <p style="text-align:left">&emsp;&emsp;&emsp;run <a style="color:#EEE8AA" class="nav-link" href="/tests">test.py</a> to take test</p>
+                    <p style="text-align:left">&emsp;&emsp;&emsp;run <a style="color:#EEE8AA" class="nav-link" href="/results">result.py</a> to view result</p>
+                    <p style="text-align:left"><span style="color:green">{{ request.user }}@foobar:</span><span style="color:blue">~/foobar</span>$&ensp;<input  action="POST" class="no-outline" name="opt" type="username" style="background-color: #000000;border-top-style:hidden;border-right-style:hidden;border-left-style:hidden;border-bottom-style:hidden;color:#FFFFFF" placeholder="run test.py" autofocus></p>
+                    <input type="submit" name="proceed" hidden />
+                </form>
             {% endif %}
         
         
@@ -40,7 +50,7 @@
                 <p><label for="password">Password: </label>
                 <input  class="password" name="password" type="password" rows="1" cols="66" required><br><br></p>
                 
-                <button class="button" type="submit">Login</button>
+                <button class="button" type="submit" name="login">Login</button>
                 
             </form>
         {% endif %}
@@ -48,7 +58,7 @@
         
         <br><br>
         
-        {% if request.user.is_authenticated %}
+<!--         {% if request.user.is_authenticated %}
             <nav style="text-align:center;color:#DAA520;font-size:20px" class="navbar navbar-expand-lg navbar-dark bg-dark">
                     <li class="nav-item active;padding-left:30px">
                         <a style="color:#FFFFFF" class="nav-link" href="/tests">Take Test</a>
@@ -58,7 +68,7 @@
                         <a style="color:#FFFFFF" class="nav-link" href="/results">Check Results</a>
                     </li>
             </nav>
-        {% endif %}
+        {% endif %} -->
         
         
         

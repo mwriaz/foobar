@@ -15,19 +15,82 @@
 </head>
 
 <body >
-
-    <div>
-        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:270px;width:50%;margin:0 auto;padding:0px 5px;">
-            {% if request.user.is_authenticated %}
-                <form method="POST" action="/">
-                {% csrf_token %}
-                </form>
+    <form method="POST" action="/results/">
+        {% csrf_token %}
+        <div>
+            {% if superuserflag %}
+                <br><br><br><br>
+                 <nav style="text-align:center;color:#DAA520" class="navbar navbar-expand-lg navbar-dark bg-dark">
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent" style="color:#DAA520">
+                        <li class="nav-item active">
+                            <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="by_e_link">search by email</button>
+                        </li>
+                            |   
+                        <li class="nav-item active">
+                            <button style="color:#EEE8AA;background-color:#000000" class="nav-link"  type="submit" name="by_t_link">search by test id</button>
+                        </li>
+                    </div>
+                </nav>
             {% endif %}
+            <br><br>
+            {% if op == 1 %}
+                {% if superuserflag %}
+                    <h1> Search by Test ID</h1>
+                {% endif %}
+            {% endif %}
+            {% if op == 2 %}
+            <h1> Search by Email ID</h1>
+            {% endif %}
+            <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:170px;width:50%;margin:0 auto;padding:0px 5px;">
+                {% if op == 1 %}
+                    {% if superuserflag %}
+                        <p>
+                            <label>Select Test: </label>
+                            <select id="t_id" class="t_id" name="t_id">
+                                {% for i in t_ids %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </p>
+                        <p>
+                            <label>Select Batch: </label>
+                            <select id="b_id" class="b_id" name="b_id">
+                                <option value="All">All</option>
+                                {% for i in b_ids %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </p>
+                    <br>
+                    <p>
+                        <button type="submit" id="button" class="button" name="search_test" value={{op}}>View</button>
+                        <button type="submit" id="button" class="button" name="download_test" value={{op}}>Downlod</button>
+                    </p>
+                    {% endif %}
+                {% endif %}
+                {% if op == 2 %}
+                    <br>
+                    <p>
+                        <label>Email ID: </label>
+                        {% if superuserflag %}
+                            <input type="email" class="email" id="email" name="email" value={{email}}>
+                        {% endif %}
+                        {% if not superuserflag %}
+                            <input type="email" class="email" id="email" name="email" value={{email}} readonly>
+                        {% endif %}
+                    </p>
+                    <br>
+                    <p>
+                        <button type="submit" id="button" class="button" name="search_email" value={{op}}>View</button>
+                        <button type="submit" id="button" class="button" name="download_email" value={{op}}>Download</button>
+                    </p>
+                {% endif %}
+            </div>
+            <div>
+                {{search|safe}}
+            </div>
         </div>
-    </div>
-
-
-
+    </form>
 </body>
 
 

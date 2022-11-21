@@ -18,10 +18,84 @@
     <form method="POST" action="/take_test/">
         {% csrf_token %}
         <div>
-            <h1><b>{{t_id}}<b><h1>
-            <div style="border-style:dashed;border-color:#fffffF;border-width:thin;height:270px;width:50%;margin:0 auto;padding:0px 5px;">
-            
+            <h1><b><span style="color:#DAA520">Test Name: </span><span style="color:#EEE8AA"><u>{{t_id}}</u></span></b></h1>
+            <h4 align="center"><span style="color:#DAA520">Problem: </span><span style="color:#EEE8AA"><u><b>{{q_id}}</b> out of <b>{{t_questions}}</b></u></span></h4>
+            <h4 align="center"><span style="color:#DAA520">Status: </span><span style="color:#EEE8AA"><u><b>{{status}}</b></u></span></h4>
+            <div style="width:100%;margin:0 auto;padding:0px 5px;">
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:20%;"><h4 align="left"><span style="color:#DAA520">Problem Statement </span><span style="color:#EEE8AA;">(Socre: <u>{{score}}</u>)</span></h4></div>
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:2%;"><h4></h4></div>
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:28%;"><h4 align="right"><span style="color:#DAA520">Email: </span><span style="color:#EEE8AA"><u>{{u_email}}</u></span></h4></div>
+            </div>
+            <div style="border-style:dashed;border-color:#fffffF;border-width:thin;width:50%;margin:0 auto;padding:0px 5px;">
+                <p align="left" style="white-space:pre-line;color:#EEE8AA;">{{statement}}<p>
+            </div>
+            <div>
                 
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:40%;">
+                    <h4 align="left"><span style="color:#DAA520">solution.py</span><span style="color:#EEE8AA;"> (paste your solution here)</span></h4>
+                </div>
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:5%;">
+                    
+                </div>
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:45%;">
+                    {% if testcases_flag %}
+                        <h4 align="left"><span style="color:#DAA520">Test Cases</span></h4>
+                    {% endif %}
+                    {% if not testcases_flag %}
+                        <h4 align="left"><span style="color:#DAA520">Instructions</span></h4>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:40%;">
+                    <textarea class="no-outline" name="solution" type="textbox" style="background-color:#000000;color:#FFFFFF;border-style:dashed;border-color:#fffffF;border-width:thin;height:180px;width:100%;margin:0 auto;padding:0px 5px;" autofocus>{{prefilled_solution}}</textarea>
+                    <br><br>
+                    <div style="width:100%;margin:0 auto;">
+                        <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:25%;">
+                            <p align="left">
+                                <button style="background-color:#DAA520;color:white;padding:12px 25px;font-size:16px;width:120px;" class="button" type="submit" name="previous" value={{t_id}},{{q_id}}>Previous</button>
+                            </p>
+                        </div>
+                        <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:20%;">
+                            <p align="center">
+                                <button style="background-color:#DAA520;color:white;padding:12px 25px;font-size:16px;width:120px;" class="button" type="submit" name="verify" value={{t_id}},{{q_id}}>Verify</button>
+                            </p>
+                        </div>
+                        <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:20%;">
+                            <p align="center">
+                                <button style="background-color:#DAA520;color:white;padding:12px 25px;font-size:16px;width:120px;" class="button" type="submit" name="submit" value={{t_id}},{{q_id}}>Submit</button>
+                            </p>
+                        </div>
+                        <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:28%;">
+                            <p align="right">
+                                <button style="background-color:#DAA520;color:white;padding:12px 25px;font-size:16px;width:120px;" class="button" type="submit" name="next" value={{t_id}},{{q_id}}>Next</button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:5%;">
+                    
+                </div>
+                <div style="display:inline-block;*display:inline;zoom:1;vertical-align:top;width:45%;">
+                    {% if testcases_flag %}
+                        {{testcases|safe}}
+                    {% endif %}
+                    {% if not testcases_flag %}
+                        <div style="border-style:dashed;border-color:#fffffF;border-width:thin;width:100%;margin:0 auto;padding:0px 5px;">
+                            <p align="left" style="white-space:pre-line;">1. Paste your code below in solution.py (Text box).
+                                  2. solution.py may contain atleast one function with name solution with exactly one parameter. Example: solution(x)
+                                  3. print, input and import statemets are not allowed in solution.py
+                                  4. infinite loops and infinte nested recursions are not allowed in solution.py
+                                  5. Your solution will be tested on different test cases. A solution will be consider CORRECT if it passes all test cases.
+                                  6. To run test cases (test the correctness of your solution) press verify button. <u><b>Verify button will just run test cases,It will not submit the solution.</b></u>
+                                  7. To submit your solution use submit button. <u><b>You should verify your solution first, before subimitting your solution.</b></u>
+                                  8. You can't submit solution for same problem twice. So submit it after testing with verify button and finalizing your solution.
+                                  9. You may use Previous and Next buttons for previous and next problem. But remember, you can't submit an already submitted problem. You can submit only such problems, which you have skipped.
+                                  10.You can also submit your solution if all the test cases are not passing.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </form>

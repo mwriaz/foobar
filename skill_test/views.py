@@ -224,11 +224,11 @@ def tests(request):
         return redirect(index)
     tests = Tests.objects.all()
     t_ids = [t.t_id for t in tests if t.is_open]
+    username = request.user.username
     if request.user.is_superuser:
         allowed_test = t_ids
-        email = request.user.username+"@super.user"
+        email = User.objects.filter(username=username)[0].email
     else:
-        username = request.user.username
         u = Users.objects.filter(username=username)[0]
         email = u.email
         allowed_test = json.loads(u.allowed_test)
@@ -278,7 +278,7 @@ def take_test(request, t_id="", q_id=1):
         return redirect(index)
     username = request.user.username
     if request.user.is_superuser:
-        email = username+"@super.user"
+        email = User.objects.filter(username=username)[0].email
     else:
         u = Users.objects.filter(username=username)[0]
         email = u.email
@@ -620,7 +620,7 @@ def results(request, op=2):
         search = ""
         username = request.user.username
         if request.user.is_superuser:
-            email = username+"@super.user"
+            email = User.objects.filter(username=username)[0].email
             superuserflag = True
         else:
             u = Users.objects.filter(username=username)[0]
@@ -631,20 +631,111 @@ def results(request, op=2):
             if "by_e_link" in request.POST:
                 op = 2
             if "search_email" in request.POST or "download_email" in request.POST:
-                if "search_email" in request.POST:
-                    op = int(request.POST.get("search_email"))
-                if "download_email" in request.POST:
-                    op = int(request.POST.get("download_email"))
+                op = 2
                 email = request.POST.get("email")
-                print(email)
+                results = Results.objects.filter(email=email)
+                test_wise_results = {}
+                for r in results:
+                    if r.t_id not in test_wise_results:
+                        test_wise_results[r.t_id] = {}
+                    test_wise_results[r.t_id][r.q_id] = r
+                
+                print(test_wise_results)
+                if test_wise_results:
+                    test_wise_ques = {}
+                    for t_id in test_wise_results:
+                        questions = Questions.objects.filter(t_id=t_id)
+                        test_wise_ques[t_id] = {q.q_id:q.score for q in questions}
+                    max_ques = max([max(list(qs)) for qs in test_wise_ques.values()])
+                    results_dict = {
+                        "email":[],
+                        "test":[]
+                    }
+                    results_dict.update({"Q"+str(i+1):[] for i in range(max_ques)})
+                    results_dict.update({"total":[]})
+                    for t_id,qs in test_wise_ques.items():
+                        results_dict["email"] += [email]
+                        results_dict["test"] += [t_id]
+                        total_score, total_abt_score = 0, 0
+                        for q_id in range(1,max_ques+1):
+                            if q_id in test_wise_ques[t_id]:
+                                score = test_wise_ques[t_id][q_id]
+                                total_score += score
+                                obt_marks = test_wise_results[t_id].get(q_id,{})
+                                try:
+                                    obt_marks = round(obt_marks.obtained_marks,2)
+                                    total_abt_score += obt_marks
+                                    obt_marks = str(obt_marks)
+                                except:
+                                    obt_marks = ""
+                                results_dict["Q"+str(q_id)] += [obt_marks+"/"+str(round(score,2))]
+                            else:
+                                results_dict["Q"+str(q_id)] += [""]
+                        results_dict["total"] += [str(total_abt_score)+"/"+str(total_score)]
+                    df = pd.DataFrame.from_dict(results_dict)
+                    if "search_email" in request.POST:
+                        op = int(request.POST.get("search_email"))
+                        search = df.to_html(classes='table table-stripped')
+                        search = search.replace('<table border="1"','<table style="border-style:dashed;border-color:#fffffF;border-width:thin;height:100px;width:100%;"')
+                        search = search.replace('<th>','<th align="center">')
+                        search = "<br><br><h2 align='left'>Results</h2>"+search
+                    if "download_email" in request.POST:
+                        op = int(request.POST.get("download_email"))
+                        return download_df_as_csv(df,email+"_results.csv")
+                else:
+                    search = "<br><br><h2 align='center'>No Results Found!!</h2>"
             if "search_test" in request.POST or "download_test" in request.POST:
-                if "search_test" in request.POST:
-                    op = int(request.POST.get("search_test"))
-                if "download_test" in request.POST:
-                    op = int(request.POST.get("download_test"))
-                t_id = request.POST.get("t_id")
-                b_id = request.POST.get("b_id")
-                print(t_id,b_id)
+                op = 1
+                try:
+                    t_id = request.POST.get("t_id")
+                    b_id = request.POST.get("b_id")
+                    try:
+                        u_ids = Batches.objects.filter(b_id=b_id)[0].u_ids
+                    except:
+                        u_ids = False
+                    ques = Questions.objects.filter(t_id=t_id)
+                    ques = {q.q_id:q.score for q in ques}
+                    max_ques = max(list(ques))
+                    results = Results.objects.filter(t_id=t_id)
+                    email_wise_results = {}
+                    for r in results:
+                        if r.email not in email_wise_results:
+                            email_wise_results[r.email] = {}
+                        email_wise_results[r.email][r.q_id] = r
+                    results_dict = {
+                            "email":[],
+                            "test":[]
+                        }
+                    results_dict.update({"Q"+str(i+1):[] for i in range(max_ques)})
+                    results_dict.update({"total":[]})
+                    for email,res in email_wise_results.items():
+                        if not u_ids or email in u_ids:
+                            results_dict["email"] += [email]
+                            results_dict["test"] += [t_id]
+                            total_score, total_obt_score = 0,0
+                            for q_id in range(1,max_ques+1):
+                                score = round(ques[q_id],2)
+                                total_score += score
+                                try:
+                                    obt_score = round(res[q_id].obtained_marks,2)
+                                    total_obt_score += obt_score
+                                    obt_score = str(obt_score)
+                                except:
+                                    obt_score = ""
+                                results_dict["Q"+str(q_id)] += [obt_score+"/"+str(score)]
+                            results_dict["total"] += ["/"+str(total_score)]
+                    df = pd.DataFrame.from_dict(results_dict)
+                    if "search_test" in request.POST:
+                        op = int(request.POST.get("search_test"))
+                        search = df.to_html(classes='table table-stripped')
+                        search = search.replace('<table border="1"','<table style="border-style:dashed;border-color:#fffffF;border-width:thin;height:100px;width:100%;"')
+                        search = search.replace('<th>','<th align="center">')
+                        search = "<br><br><h2 align='left'>Results</h2>"+search
+                    if "download_test" in request.POST:
+                        op = int(request.POST.get("download_test"))
+                        return download_df_as_csv(df,t_id+"_"+b_id+"_results.csv")
+                except:
+                    search = "<br><br><h2 align='center'>No Results Found!!</h2>"
     except:
         print(traceback.print_exc())
     return render(

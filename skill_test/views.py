@@ -277,7 +277,7 @@ def take_test(request, t_id="", q_id=1):
             u = Users.objects.filter(username=username)[0]
             email = u.email
             allowed_test = json.loads(u.allowed_test)
-            if t_id not in allowed_test and "demo" not in t.t_id:
+            if t_id not in allowed_test and "demo" not in t_id:
                 messages.error(request, "You are not allowed to attempt this test!")
                 return redirect(index)
         if request.method == "POST":
@@ -394,7 +394,7 @@ def users_m(request, op=1, batches=[], all_t_ids=[]):
             if "d_batch" in request.POST:
                 op = 6
             if "download_csv" in request.POST:
-                op = int(request.POST.get("download_csv"))
+                op = 4
                 return download_file("templates/batch_template.csv")
             if "add_user" in request.POST:
                 op = int(request.POST.get("add_user"))

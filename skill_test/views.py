@@ -102,8 +102,6 @@ def test_manage(request, op=1):
     all_t_ids = [t.t_id for t in tests]
     available_t_ids = [t.t_id for t in tests if t.is_open]
     not_available_t_ids = [t.t_id for t in tests if not t.is_open]
-    print("available_t_ids:",available_t_ids)
-    print("not_available_t_ids:",not_available_t_ids)
     if request.method == "POST":
         if "e_test" in request.POST:
             op = 1
@@ -138,7 +136,6 @@ def test_manage(request, op=1):
             t_id = request.POST.get("t_id")
             is_open = request.POST.get("enable")=="enable"
             if t_id not in all_t_ids:
-                print(op, t_id, is_open)
                 t = Tests(t_id=t_id, is_open=is_open)
                 t.save()
                 messages.success(request, "Added")
@@ -147,7 +144,6 @@ def test_manage(request, op=1):
         if "add_q" in request.POST:
             op = int(request.POST.get("add_q"))
             t_id = request.POST.get("t_ids")
-            print("t_id:",t_id)
             statement = request.POST.get("statement")
             solution = request.POST.get("solution")
             score = request.POST.get("score")
@@ -155,7 +151,6 @@ def test_manage(request, op=1):
             out = request.POST.getlist("out")
             points = request.POST.getlist("points")
             h = request.POST.getlist("h")
-            print(len(inp),len(out),len(points),len(h))
             try:
                 gts = {}
                 for i in range(10):
@@ -175,11 +170,9 @@ def test_manage(request, op=1):
                     score = float(score)
                     try:
                         json.dumps(gts)
-                        print(gts)
                         try:
                             exec(solution)
                             blow_flag, blow, obt_marks = validate(solution, gts, score)
-                            print(blow_flag, blow, obt_marks)
                             questions = Questions.objects.filter(t_id=t_id)
                             q_id = len(questions)+1
                             if round(float(score),2)==round(float(obt_marks),2):
@@ -257,107 +250,108 @@ def take_test(request, t_id="", q_id=1):
         return redirect(index)
     if not request.user.is_authenticated:
         return redirect(index)
-    if request.method == "POST":
-        if "previous" in request.POST:
-            t_id, q_id = request.POST.get("previous").split(",")
-        if "next" in request.POST:
-            t_id, q_id = request.POST.get("next").split(",")
-        if "verify" in request.POST:
-            t_id, q_id = request.POST.get("verify").split(",")
-        if "submit" in request.POST:
-            t_id, q_id = request.POST.get("submit").split(",")
-        q_id = int(q_id)
-    status = "Un Attempted"
-    testcases_flag = False
-    testcases = ""
-    prefilled_solution = "def solution(x):\n    # return your code"
-    questions = Questions.objects.filter(t_id=t_id)
-    total_questions = len(questions)
-    if q_id>total_questions:
-        messages.error(request, "Technical Error!")
-        return redirect(index)
-    username = request.user.username
-    if request.user.is_superuser:
-        email = User.objects.filter(username=username)[0].email
-    else:
-        u = Users.objects.filter(username=username)[0]
-        email = u.email
-        allowed_test = json.loads(u.allowed_test)
-        if t_id not in allowed_test and "demo" not in t.t_id:
-            messages.error(request, "You are not allowed to attempt this test!")
+    try:
+        if request.method == "POST":
+            if "previous" in request.POST:
+                t_id, q_id = request.POST.get("previous").split(",")
+            if "next" in request.POST:
+                t_id, q_id = request.POST.get("next").split(",")
+            if "verify" in request.POST:
+                t_id, q_id = request.POST.get("verify").split(",")
+            if "submit" in request.POST:
+                t_id, q_id = request.POST.get("submit").split(",")
+            q_id = int(q_id)
+        status = "Un Attempted"
+        testcases_flag = False
+        testcases = ""
+        prefilled_solution = "def solution(x):\n    # your code here"
+        questions = Questions.objects.filter(t_id=t_id)
+        total_questions = len(questions)
+        if q_id>total_questions:
+            messages.error(request, "Technical Error!")
             return redirect(index)
-    if request.method == "POST":
-        if "previous" in request.POST:
-            q_id -= 1
-            if q_id<1:
-                q_id = 1
-            print(q_id,t_id,"previous")
-        if "next" in request.POST:
-            q_id += 1
-            if q_id>=total_questions:
-                q_id = total_questions
-            print(q_id,t_id,"next")
-        if "verify" in request.POST or "submit" in request.POST:
-            try:
-                r_flag = False
-                results = Results.objects.filter(t_id=t_id, email=email, q_id=questions[q_id-1].q_id)
-                if results:
-                    r_flag = results[0]
-                    if r_flag.t_cases>0:
-                        status = "Submitted"
+        username = request.user.username
+        if request.user.is_superuser:
+            email = User.objects.filter(username=username)[0].email
+        else:
+            u = Users.objects.filter(username=username)[0]
+            email = u.email
+            allowed_test = json.loads(u.allowed_test)
+            if t_id not in allowed_test and "demo" not in t.t_id:
+                messages.error(request, "You are not allowed to attempt this test!")
+                return redirect(index)
+        if request.method == "POST":
+            if "previous" in request.POST:
+                q_id -= 1
+                if q_id<1:
+                    q_id = 1
+            if "next" in request.POST:
+                q_id += 1
+                if q_id>=total_questions:
+                    q_id = total_questions
+            if "verify" in request.POST or "submit" in request.POST:
+                try:
+                    r_flag = False
+                    results = Results.objects.filter(t_id=t_id, email=email, q_id=questions[q_id-1].q_id)
+                    if results:
+                        r_flag = results[0]
+                        if r_flag.t_cases>0:
+                            status = "Submitted"
+                        else:
+                            status = "Not Submitted"
+                except:
+                    pass
+
+                if status=="Submitted":
+                    messages.error(request, "Already submitted!\nYou cant submit a solution twice.")
+                else:
+                    solution = request.POST.get("solution")
+                    groundtruths = json.loads(questions[q_id-1].groundtruths)
+                    score = int(questions[q_id-1].score)
+                    solution_flag, testcases, obt_marks = validate(solution, groundtruths, score)
+                    testcases = testcases.replace('<table border="1"','<table style="border-style:dashed;border-color:#fffffF;border-width:thin;height:100px;width:100%;"')
+                    testcases = testcases.replace('<th>','<th align="center">')
+                    testcases_flag = True
+                    if solution_flag:
+                        t_cases = len(groundtruths)
+                        p_cases = testcases.count("Passed")
+                        if "submit" in request.POST:
+                            if r_flag:
+                                r = r_flag
+                                r.obtained_marks = obt_marks
+                                r.soultion = solution
+                                r.t_cases = t_cases
+                                r.p_cases = p_cases
+                            else:
+                                r = Results(t_id=t_id, q_id=q_id, obtained_marks=obt_marks, total_marks=score, email=email, solution=solution, t_cases=t_cases, p_cases=p_cases)
+                            r.save()
+                            messages.success(request, 'Your solution has been submitted!')
+                        else:
+                            if r_flag:
+                                r = r_flag
+                                r.soultion = solution
+                                r.p_cases = p_cases
+                            else:
+                                r = Results(t_id=t_id, q_id=q_id, obtained_marks=0, total_marks=score, email=email, solution=solution, t_cases=0, p_cases=0)
+                            r.save()
+                            status = "Submitted"
+                            messages.success(request, 'Your solution has been Verified!\nPress submit button to submit it.')
                     else:
                         status = "Not Submitted"
-            except:
-                pass
-
-            if status=="Submitted":
-                messages.error(request, "Already submitted!\nYou cant submit a solution twice.")
-            else:
-                solution = request.POST.get("solution")
-                groundtruths = json.loads(questions[q_id-1].groundtruths)
-                score = int(questions[q_id-1].score)
-                solution_flag, testcases, obt_marks = validate(solution, groundtruths, score)
-                testcases = testcases.replace('<table border="1"','<table style="border-style:dashed;border-color:#fffffF;border-width:thin;height:100px;width:100%;"')
-                testcases = testcases.replace('<th>','<th align="center">')
-                testcases_flag = True
-                if solution_flag:
-                    t_cases = len(groundtruths)
-                    p_cases = testcases.count("Passed")
-                    if "submit" in request.POST:
-                        if r_flag:
-                            r = r_flag
-                            r.obtained_marks = obt_marks
-                            r.soultion = solution
-                            r.t_cases = t_cases
-                            r.p_cases = p_cases
-                        else:
-                            r = Results(t_id=t_id, q_id=q_id, obtained_marks=obt_marks, total_marks=score, email=email, solution=solution, t_cases=t_cases, p_cases=p_cases)
-                        r.save()
-                        messages.success(request, 'Your solution has been submitted!')
-                    else:
-                        if r_flag:
-                            r = r_flag
-                            r.soultion = solution
-                            r.p_cases = p_cases
-                        else:
-                            r = Results(t_id=t_id, q_id=q_id, obtained_marks=0, total_marks=score, email=email, solution=solution, t_cases=0, p_cases=0)
-                        r.save()
-                        status = "Submitted"
-                        messages.success(request, 'Your solution has been Verified!\nPress submit button to submit it.')
+                        messages.error(request, 'Unsuccessful!\nRemove errors from your code!')
+        try:
+            results = Results.objects.filter(t_id=t_id, email=email, q_id=questions[q_id-1].q_id)
+            if results:
+                results = results[0]
+                prefilled_solution = results.solution
+                if results.t_cases>0:
+                    status = "Submitted"
                 else:
                     status = "Not Submitted"
-                    messages.error(request, 'Unsuccessful!\nRemove errors from your code!')
-    try:
-        results = Results.objects.filter(t_id=t_id, email=email, q_id=questions[q_id-1].q_id)
-        if results:
-            results = results[0]
-            prefilled_solution = results.solution
-            if results.t_cases>0:
-                status = "Submitted"
-            else:
-                status = "Not Submitted"
+        except:
+            pass
     except:
-        pass
+        print(traceback.print_exc())
     
     return render(
         request,
@@ -492,10 +486,7 @@ def users_m(request, op=1, batches=[], all_t_ids=[]):
                                 try:
                                     u = u[0]
                                     u.is_active = True
-                                    print(t_id)
-                                    print(u.name, u.allowed_test)
                                     u.allowed_test = json.dumps(list(set(json.loads(u.allowed_test)+[t_id])))
-                                    print(u.name, u.allowed_test)
                                     u.save()
                                 except:
                                     error_e += [email]
@@ -639,8 +630,6 @@ def results(request, op=2):
                     if r.t_id not in test_wise_results:
                         test_wise_results[r.t_id] = {}
                     test_wise_results[r.t_id][r.q_id] = r
-                
-                print(test_wise_results)
                 if test_wise_results:
                     test_wise_ques = {}
                     for t_id in test_wise_results:

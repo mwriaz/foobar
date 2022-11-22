@@ -511,7 +511,7 @@ def users_m(request, op=1, batches=[], all_t_ids=[]):
                             all_existing_usernames = [u.username for u in all_authenticated_users]
                             all_existing_emails = [u.email for u in all_authenticated_users]
                             emails_to_add = []
-                            status_dict = {"name":[],"email":[],"password":[],"remarks":[]}
+                            status_dict = {"name":[],"email":[],"username":[],"password":[],"remarks":[]}
                             for i in range(len(df)):
                                 p, s = "", "Failed"
                                 row = df.iloc[i]
@@ -529,6 +529,7 @@ def users_m(request, op=1, batches=[], all_t_ids=[]):
                                     dob="2000-01-01"
                                 try:
                                     if email in all_existing_emails:
+                                        username = ""
                                         p = ""
                                         s = "Previous user. Use previous password to login"
                                     else:
@@ -539,11 +540,13 @@ def users_m(request, op=1, batches=[], all_t_ids=[]):
                                             p = password
                                             s = "New user"
                                         else:
+                                            username = ""
                                             p = ""
                                             s = "Failed"
                                     u = Users.objects.filter(email=email)
                                     if u:
                                         u = u[0]
+                                        username = u.username
                                         u.password = password
                                         u.is_active = True
                                         u.save()
@@ -552,8 +555,10 @@ def users_m(request, op=1, batches=[], all_t_ids=[]):
                                         usr.save()
                                 except:
                                     p, s = "", "Failed"
+                                    username = ""
                                 status_dict["name"] += [name]
                                 status_dict["email"] += [email]
+                                status_dict["username"] += [username]
                                 status_dict["password"] += [p]
                                 status_dict["remarks"] += [s]
                                 if s!="Failed":

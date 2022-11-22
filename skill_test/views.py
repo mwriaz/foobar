@@ -232,7 +232,7 @@ def tests(request):
         u = Users.objects.filter(username=username)[0]
         email = u.email
         allowed_test = json.loads(u.allowed_test)
-    t_ids = [t.t_id for t in tests if t.t_id in allowed_test]
+    t_ids = [t.t_id for t in tests if t.t_id in allowed_test or "demo" in t.t_id]
     t_ids = [t_id for t_id in t_ids if Questions.objects.filter(t_id=t_id)]
     if request.method == "POST":
         agree = bool(request.POST.get("agree"))
@@ -283,7 +283,7 @@ def take_test(request, t_id="", q_id=1):
         u = Users.objects.filter(username=username)[0]
         email = u.email
         allowed_test = json.loads(u.allowed_test)
-        if t_id not in allowed_test:
+        if t_id not in allowed_test and "demo" not in t.t_id:
             messages.error(request, "You are not allowed to attempt this test!")
             return redirect(index)
     if request.method == "POST":

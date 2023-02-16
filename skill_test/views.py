@@ -319,7 +319,7 @@ def take_test(request, t_id="", q_id=1):
                             if r_flag:
                                 r = r_flag
                                 r.obtained_marks = obt_marks
-                                r.soultion = solution
+                                r.solution = solution
                                 r.t_cases = t_cases
                                 r.p_cases = p_cases
                             else:
@@ -329,7 +329,7 @@ def take_test(request, t_id="", q_id=1):
                         else:
                             if r_flag:
                                 r = r_flag
-                                r.soultion = solution
+                                r.solution = solution
                                 r.p_cases = p_cases
                             else:
                                 r = Results(t_id=t_id, q_id=q_id, obtained_marks=0, total_marks=score, email=email, solution=solution, t_cases=0, p_cases=0)
@@ -717,7 +717,7 @@ def results(request, op=2):
                                 except:
                                     obt_score = ""
                                 results_dict["Q"+str(q_id)] += [obt_score+"/"+str(score)]
-                            results_dict["total"] += ["/"+str(total_score)]
+                            results_dict["total"] += [str(total_obt_score)+"/"+str(total_score)]
                     df = pd.DataFrame.from_dict(results_dict)
                     if "search_test" in request.POST:
                         op = int(request.POST.get("search_test"))
